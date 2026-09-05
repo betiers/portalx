@@ -168,6 +168,72 @@ header .titles .sub {
   font-weight: 500;
 }
 
+.profile-card {
+  background: rgba(27, 25, 30, 0.92);
+  border-radius: 20px;
+  padding: 24px 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: fade 0.35s ease both;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.profile-sub {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.profile-gram {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  background: rgba(208, 188, 255, 0.12);
+  border-radius: 999px;
+  padding: 8px 16px 8px 12px;
+}
+
+.profile-gram .gram-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.profile-gram .gram-value {
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
+}
+
+.profile-gram .gram-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
 @keyframes fade {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -191,7 +257,18 @@ header .titles .sub {
 
   <div class="view active" id="viewHome"></div>
 
-  <div class="view" id="viewProfile"></div>
+  <div class="view" id="viewProfile">
+    <div class="profile-card">
+      <div class="profile-avatar" id="profileAvatar">?</div>
+      <div class="profile-name" id="profileName">—</div>
+      <div class="profile-sub" id="profileUsername">—</div>
+      <div class="profile-gram">
+        <img class="gram-icon" src="/icons/gram.svg" alt="">
+        <span class="gram-value" id="profileGram">—</span>
+        <span class="gram-label">GRAM</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="bar">
@@ -263,7 +340,23 @@ function resolveUser() {
 
 const DATA_URL = '/data';
 
+var currentUser = null;
+var currentGram = null;
+
+function renderProfile() {
+  if (!currentUser) return;
+  var name = (currentUser.first_name || currentUser.username) || 'Portals';
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('profileUsername').textContent = currentUser.username ? ('@' + currentUser.username) : '';
+  var first = (name || '?').charAt(0).toUpperCase();
+  document.getElementById('profileAvatar').textContent = first;
+  var gram = currentGram != null ? currentGram : 0;
+  document.getElementById('profileGram').textContent = gram.toFixed(4).replace(/\.?0+$/, '');
+}
+
 function loadGram(user) {
+  if (!user) return;
+  currentUser = user;
   var chip = document.getElementById('gramChip');
   fetch(DATA_URL, { mode: 'cors' })
     .then(function (res) {
@@ -274,12 +367,15 @@ function loadGram(user) {
       var entry = data[String(user.id)] || data[user.id];
       var gram = entry && entry.gram != null ? Number(entry.gram) : null;
       if (gram == null) throw new Error('no gram');
+      currentGram = gram;
       document.getElementById('gramValue').textContent = gram.toFixed(4).replace(/\.?0+$/, '');
       chip.style.display = 'flex';
+      renderProfile();
     })
     .catch(function (err) {
       console.warn('GRAM load failed:', err);
       chip.style.display = 'none';
+      renderProfile();
     });
 }
 
@@ -299,6 +395,7 @@ function showView(name) {
     b.classList.toggle('active', b.getAttribute('data-view') === name);
   });
   placeIndicator();
+  if (name === 'profile') renderProfile();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -317,6 +414,8 @@ function init() {
       if (user) {
         var name = (user.first_name || user.username) ? user.first_name || user.username : 'Portals';
         document.getElementById('userInfo').textContent = name;
+        currentUser = user;
+        renderProfile();
         loadGram(user);
       }
     }
