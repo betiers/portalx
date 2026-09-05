@@ -6,45 +6,67 @@
 <title>Portals</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b0e14;color:#f0f0f2;min-height:100vh;padding:0 0 120px}
-.avatar{position:fixed;top:12px;right:14px;width:46px;height:46px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.12);background:#1c2230;z-index:50;display:flex;align-items:center;justify-content:center}
+:root{
+  --bg:#121014;
+  --surface:#1e1b22;
+  --surface-high:#26222c;
+  --text:#f4f0f6;
+  --text-dim:#a7a0ab;
+  --accent:#ff8a6b;
+  --accent-2:#ffc06b;
+  --radius:28px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 16px 130px;overflow-x:hidden}
+button{border:0;outline:0;background:none;color:inherit;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+header{padding:20px 4px 4px;animation:rise .6s ease both}
+header .top{display:flex;align-items:flex-start;justify-content:space-between;position:relative}
+header h1{font-size:30px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+header p.sub{color:var(--text-dim);font-size:13px;margin-top:6px}
+.avatar{width:54px;height:54px;border-radius:50%;padding:3px;background:linear-gradient(140deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 10px 30px rgba(255,138,107,.25);animation:rise .6s .15s ease both}
+.avatar .inner{width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--surface-high);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--accent)}
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.avatar span{font-size:18px;font-weight:700;color:#34d399}
-header{padding:18px 18px 8px}
-header h1{font-size:20px;font-weight:700;letter-spacing:.3px}
-header p{color:#8b93a3;font-size:12px;margin-top:2px}
-.card{background:#141a26;border-radius:22px;padding:18px;margin:12px 18px}
-.card h3{color:#34d399;margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:1.2px}
-.balance-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #222a3a;font-size:16px}
-.balance-item:last-child{border:none}
-.balance-item .label{color:#8b93a3}
-.balance-item .value{font-weight:700;color:#fff}
-#status{text-align:center;margin:12px 18px;color:#8b93a3;font-size:13px}
-.error{color:#f87171;font-size:14px;text-align:center;margin:12px 18px}
-.bar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:center;padding:8px;background:rgba(20,26,38,.92);border:1px solid #222a3a;border-radius:999px;backdrop-filter:blur(10px);z-index:50}
-.bar button{width:46px;height:46px;border:0;border-radius:50%;background:#1c2230;color:#8b93a3;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.bar button.active{background:#34d399;color:#0b0e14}
-.bar button:active{transform:scale(.92)}
-.bar svg{width:22px;height:22px}
+.card{background:var(--surface);border-radius:var(--radius);padding:22px;margin:18px 0;box-shadow:0 14px 40px rgba(0,0,0,.35);animation:rise .7s ease both}
+.card:nth-of-type(2){animation-delay:.2s}
+.card h3{color:var(--text-dim);margin-bottom:6px;font-size:12px;text-transform:uppercase;letter-spacing:2px;font-weight:600}
+.balance-item{display:flex;justify-content:space-between;align-items:center;padding:16px 4px;font-size:17px}
+.balance-item:not(:last-child){border-bottom:1px solid rgba(255,255,255,.05)}
+.balance-item .label{color:var(--text-dim);display:flex;align-items:center;gap:10px}
+.badge{width:10px;height:10px;border-radius:50%;display:inline-block}
+.badge.trx{background:#6bd0ff}
+.badge.usdt{background:#2bd892}
+.badge.gram{background:var(--accent)}
+.balance-item .value{font-weight:700;font-variant-numeric:tabular-nums;transition:color .3s}
+#status{text-align:center;margin:14px 4px;color:var(--text-dim);font-size:13px;min-height:18px}
+.bar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:center;padding:7px;background:rgba(30,27,34,.88);border-radius:999px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 16px 44px rgba(0,0,0,.5);z-index:50;animation:rise .7s .3s ease both}
+.bar button{width:52px;height:52px;border-radius:50%;color:var(--text-dim);display:flex;align-items:center;justify-content:center;transition:transform .18s cubic-bezier(.2,.8,.2,1),background .25s,color .25s}
+.bar button:hover{background:rgba(255,255,255,.07);color:var(--text)}
+.bar button:active{transform:scale(.9)}
+.bar button.active{background:var(--accent);color:#1a120f;box-shadow:0 8px 20px rgba(255,138,107,.4)}
+.bar svg{width:24px;height:24px}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<div class="avatar" id="avatar"></div>
+<header>
+  <div class="top">
+    <div>
+      <h1>Portals</h1>
+      <p class="sub" id="userInfo">Загрузка...</p>
+    </div>
+    <div class="avatar"><div class="inner" id="avatarInner"></div></div>
+  </div>
+</header>
 
 <div id="app">
-  <header>
-    <h1>Portals</h1>
-    <p id="userInfo">Загрузка...</p>
-  </header>
-
   <div class="card">
     <h3>Баланс</h3>
     <div id="balances">
-      <div class="balance-item"><span class="label">TRX</span><span class="value" id="trx">—</span></div>
-      <div class="balance-item"><span class="label">USDT</span><span class="value" id="usdt">—</span></div>
-      <div class="balance-item"><span class="label">GRAM</span><span class="value" id="gram">—</span></div>
+      <div class="balance-item"><span class="label"><span class="badge trx"></span>TRX</span><span class="value" id="trx">—</span></div>
+      <div class="balance-item"><span class="label"><span class="badge usdt"></span>USDT</span><span class="value" id="usdt">—</span></div>
+      <div class="balance-item"><span class="label"><span class="badge gram"></span>GRAM</span><span class="value" id="gram">—</span></div>
     </div>
   </div>
   <p id="status"></p>
@@ -52,13 +74,13 @@ header p{color:#8b93a3;font-size:12px;margin-top:2px}
 
 <div class="bar">
   <button class="active" id="btnHome" title="Домой">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>
+  </button>
+  <button id="btnStats" title="Баланс">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m6 13 4-5 4 3 6-8"/></svg>
   </button>
   <button id="btnRefresh" title="Обновить">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-  </button>
-  <button id="btnWallet" title="Кошелёк" onclick="window.scrollTo(0,0)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="3"/><path d="M16 12.5h.01"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
   </button>
 </div>
 
@@ -126,17 +148,31 @@ function resolveUser() {
 }
 
 function renderAvatar(user) {
-  var el = document.getElementById('avatar');
+  var inner = document.getElementById('avatarInner');
   var name = (user.first_name || user.username || 'U').charAt(0).toUpperCase();
   if (user.photo_url) {
     var img = document.createElement('img');
     img.src = user.photo_url;
-    img.onerror = function () { el.innerHTML = '<span>' + name + '</span>'; };
-    el.innerHTML = '';
-    el.appendChild(img);
+    img.onerror = function () { inner.innerHTML = '<span>' + name + '</span>'; };
+    inner.innerHTML = '';
+    inner.appendChild(img);
   } else {
-    el.innerHTML = '<span>' + name + '</span>';
+    inner.innerHTML = '<span>' + name + '</span>';
   }
+}
+
+function animateValue(el, target) {
+  var start = parseFloat(el.textContent) || 0;
+  var dur = 700;
+  var t0 = performance.now();
+  function step(now) {
+    var p = Math.min((now - t0) / dur, 1);
+    var eased = 1 - Math.pow(1 - p, 3);
+    var v = start + (target - start) * eased;
+    el.textContent = v.toFixed(4);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 async function load(user) {
@@ -149,21 +185,15 @@ async function load(user) {
     var res = await fetch(API + '/balance/' + user.id, {
       headers: { 'X-Telegram-Init': getInitData(findWebAppGlobal()) || '' }
     });
-    if (!res.ok) {
-      statusEl.innerHTML = '<span class="error">Сервер недоступен</span>';
-      return;
-    }
+    if (!res.ok) { statusEl.textContent = ''; return; }
     var data = await res.json();
-    if (data.error) {
-      statusEl.innerHTML = '<span class="error">' + data.error + '</span>';
-      return;
-    }
-    document.getElementById('trx').textContent = Number(data.trx || 0).toFixed(4);
-    document.getElementById('usdt').textContent = Number(data.usdt || 0).toFixed(4);
-    document.getElementById('gram').textContent = Number(data.gram || 0).toFixed(4);
+    if (data.error) { statusEl.textContent = ''; return; }
+    animateValue(document.getElementById('trx'), Number(data.trx || 0));
+    animateValue(document.getElementById('usdt'), Number(data.usdt || 0));
+    animateValue(document.getElementById('gram'), Number(data.gram || 0));
     statusEl.textContent = '';
   } catch (e) {
-    statusEl.innerHTML = '<span class="error">Ошибка подключения к серверу</span>';
+    statusEl.textContent = '';
   }
 }
 
@@ -175,16 +205,27 @@ async function init() {
     user = resolveUser();
   }
   if (!user) {
-    document.getElementById('userInfo').textContent = 'Не удалось получить данные. Откройте кнопкой в боте.';
+    document.getElementById('userInfo').textContent = 'Откройте приложение кнопкой в боте.';
     return;
   }
   var tg = findWebAppGlobal();
   if (tg && typeof tg.ready === 'function') tg.ready();
   if (tg && typeof tg.expand === 'function') tg.expand();
   renderAvatar(user);
-  document.getElementById('btnRefresh').addEventListener('click', function () { load(user); });
+
+  var btns = document.querySelectorAll('.bar button');
+  function setActive(btn) {
+    btns.forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+  document.getElementById('btnRefresh').addEventListener('click', function () { setActive(this); load(user); });
   document.getElementById('btnHome').addEventListener('click', function () {
+    setActive(this);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  document.getElementById('btnStats').addEventListener('click', function () {
+    setActive(this);
+    document.getElementById('balances').scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
   await load(user);
 }
