@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portals</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f0f1a;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
@@ -21,6 +22,8 @@ h1{margin:20px 0;font-size:24px;background:linear-gradient(135deg,#7b5ea7,#c084f
 .btn{background:linear-gradient(135deg,#7b5ea7,#a855f7);border:none;color:#fff;padding:12px 32px;border-radius:12px;font-size:16px;cursor:pointer;margin-top:20px}
 .btn:disabled{opacity:0.5}
 .error{color:#f87171;font-size:14px;margin-top:10px}
+input{background:#14142a;border:1px solid #2a2a3e;color:#fff;padding:10px 14px;border-radius:10px;font-size:15px;width:100%;max-width:240px;margin-top:10px;text-align:center}
+small{color:#666;font-size:12px;margin-top:8px;text-align:center}
 </style>
 </head>
 <body>
@@ -28,6 +31,9 @@ h1{margin:20px 0;font-size:24px;background:linear-gradient(135deg,#7b5ea7,#c084f
 <div id="auth">
   <h1>Portals</h1>
   <p style="color:#888">Откройте это приложение через Telegram</p>
+  <input type="text" id="manualId" placeholder="Или введите user id">
+  <button class="btn" id="manualBtn">Продолжить</button>
+  <small>Если приложение уже открыто в Telegram, нажмите «Продолжить»</small>
 </div>
 
 <div id="app">
@@ -57,7 +63,7 @@ if (tg) {
 }
 
 function getUserId() {
-  if (tg?.initDataUnsafe?.user?.id) return tg.initDataUnsafe.user.id;
+  if (tg?.initDataUnsafe?.user?.id) return String(tg.initDataUnsafe.user.id);
   const p = new URLSearchParams(location.search);
   return p.get('user_id');
 }
@@ -66,20 +72,14 @@ function getInitData() {
   return tg?.initData || '';
 }
 
-async function init() {
-  const userId = getUserId();
-  if (!userId) {
-    document.getElementById('auth').style.display = 'flex';
-    return;
-  }
-
+async function load(userId, initData) {
   document.getElementById('app').style.display = 'flex';
   const statusEl = document.getElementById('status');
   statusEl.textContent = 'Загрузка...';
 
   try {
     const res = await fetch(`${API}/balance/${userId}`, {
-      headers: { 'X-Telegram-Init': getInitData() }
+      headers: { 'X-Telegram-Init': initData }
     });
     const data = await res.json();
 
@@ -90,13 +90,30 @@ async function init() {
 
     document.getElementById('userInfo').textContent =
       `${data.username || 'user'} (ID: ${userId})`;
-    document.getElementById('trx').textContent = data.trx?.toFixed(4) ?? '0';
-    document.getElementById('usdt').textContent = data.usdt?.toFixed(4) ?? '0';
-    document.getElementById('gram').textContent = data.gram?.toFixed(4) ?? '0';
+    document.getElementById('trx').textContent = Number(data.trx ?? 0).toFixed(4);
+    document.getElementById('usdt').textContent = Number(data.usdt ?? 0).toFixed(4);
+    document.getElementById('gram').textContent = Number(data.gram ?? 0).toFixed(4);
     statusEl.textContent = '';
   } catch (e) {
     statusEl.innerHTML = '<span class="error">Ошибка подключения к серверу</span>';
   }
+}
+
+async function init() {
+  const userId = getUserId();
+  if (userId) {
+    await load(userId, getInitData());
+    return;
+  }
+
+  document.getElementById('auth').style.display = 'flex';
+
+  document.getElementById('manualBtn').addEventListener('click', async () => {
+    const val = document.getElementById('manualId').value.trim();
+    if (!val) return;
+    document.getElementById('auth').style.display = 'none';
+    await load(val, getInitData());
+  });
 }
 
 init();
