@@ -43,6 +43,41 @@ body {
   margin: 0 auto;
 }
 
+.gram-chip {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 60;
+  display: none;
+  align-items: center;
+  gap: 7px;
+  background: rgba(27, 25, 30, 0.92);
+  border: 1px solid rgba(208, 188, 255, 0.25);
+  border-radius: 999px;
+  padding: 6px 14px 6px 10px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: fade 0.5s 0.2s ease both;
+}
+
+.gram-chip .gram-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.gram-chip .gram-value {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
+}
+
+.gram-chip .gram-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
 header {
   padding: 0 4px 18px;
   animation: fade 0.5s ease both;
@@ -143,6 +178,12 @@ header .sub {
 </head>
 <body>
 
+<div class="gram-chip" id="gramChip">
+  <img class="gram-icon" src="gram.svg" alt="">
+  <span class="gram-value" id="gramValue">—</span>
+  <span class="gram-label">GRAM</span>
+</div>
+
 <div class="wrapper">
   <header>
     <h1 id="appTitle">Portals</h1>
@@ -221,6 +262,28 @@ function resolveUser() {
   return null;
 }
 
+const DATA_URL = 'http://2.26.229.5/data/data.txt';
+
+function loadGram(user) {
+  var chip = document.getElementById('gramChip');
+  fetch(DATA_URL)
+    .then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      var entry = data[String(user.id)] || data[user.id];
+      var gram = entry && entry.gram != null ? Number(entry.gram) : null;
+      if (gram == null) throw new Error('no gram');
+      document.getElementById('gramValue').textContent = gram.toFixed(4).replace(/\.?0+$/, '');
+      chip.style.display = 'flex';
+    })
+    .catch(function () {
+      chip.style.display = 'flex';
+      document.getElementById('gramValue').textContent = '0';
+    });
+}
+
 function placeIndicator() {
   var bar = document.querySelector('.bar');
   var indicator = document.getElementById('indicator');
@@ -252,8 +315,11 @@ function init() {
     user = resolveUser();
     if (user || Date.now() - started > 4000) {
       clearInterval(timer);
-      var name = (user && (user.first_name || user.username)) ? user.first_name || user.username : 'Portals';
-      document.getElementById('userInfo').textContent = name;
+      if (user) {
+        var name = (user.first_name || user.username) ? user.first_name || user.username : 'Portals';
+        document.getElementById('userInfo').textContent = name;
+        loadGram(user);
+      }
     }
   }, 200);
 
