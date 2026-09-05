@@ -13,6 +13,8 @@
 :root {
   --primary-color: #d0bcff;
   --on-primary: #381e72;
+  --secondary-container: #4f378b;
+  --on-secondary-container: #eaddff;
   --bg-card: #1d1b20;
   --bg-item: #2b2930;
   --text-main: #e6e1e5;
@@ -72,88 +74,6 @@ header .sub {
   display: block;
 }
 
-.card {
-  background: var(--bg-card);
-  border-radius: 20px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  padding: 0 4px;
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-title .material-symbols-outlined {
-  color: var(--primary-color);
-  font-size: 20px;
-}
-
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-item);
-  border-radius: 12px;
-  padding: 14px;
-}
-
-.row .icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(208, 188, 255, 0.14);
-  color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.row .icon .material-symbols-outlined {
-  font-size: 20px;
-}
-
-.row .name {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-main);
-}
-
-.row .value {
-  font-size: 14px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-sub);
-}
-
-#status {
-  text-align: center;
-  margin: 14px 0;
-  color: var(--text-sub);
-  font-size: 12px;
-  min-height: 16px;
-}
-
 .bar {
   position: fixed;
   bottom: 16px;
@@ -162,13 +82,11 @@ header .sub {
   width: max-content;
   margin: 0 auto;
   display: flex;
-  gap: 4px;
-  align-items: flex-end;
+  gap: 8px;
+  align-items: center;
   padding: 8px;
-  background: rgba(29, 27, 32, 0.96);
+  background: var(--secondary-container);
   border-radius: 999px;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
   z-index: 50;
   animation: fade 0.4s 0.15s ease both;
 }
@@ -179,14 +97,14 @@ header .sub {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-width: 64px;
-  padding: 8px 10px;
+  min-width: 68px;
+  padding: 8px 12px;
   border: none;
-  background: none;
+  background: transparent;
   color: var(--text-sub);
   cursor: pointer;
-  border-radius: 24px;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 999px;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease, transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bar button:active {
@@ -194,7 +112,8 @@ header .sub {
 }
 
 .bar button.active {
-  color: var(--primary-color);
+  background: var(--primary-color);
+  color: var(--on-primary);
 }
 
 .bar button .material-symbols-outlined {
@@ -220,63 +139,9 @@ header .sub {
     <p class="sub" id="userInfo">Загрузка...</p>
   </header>
 
-  <div class="view active" id="viewHome">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="material-symbols-outlined">account_balance_wallet</span>
-          Баланс
-        </div>
-      </div>
-      <div class="list">
-        <div class="row">
-          <span class="icon"><span class="material-symbols-outlined">currency_bitcoin</span></span>
-          <span class="name">TRX</span>
-          <span class="value" id="trx">—</span>
-        </div>
-        <div class="row">
-          <span class="icon"><span class="material-symbols-outlined">currency_exchange</span></span>
-          <span class="name">USDT</span>
-          <span class="value" id="usdt">—</span>
-        </div>
-        <div class="row">
-          <span class="icon"><span class="material-symbols-outlined">diamond</span></span>
-          <span class="name">GRAM</span>
-          <span class="value" id="gram">—</span>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="view active" id="viewHome"></div>
 
-  <div class="view" id="viewProfile">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="material-symbols-outlined">person</span>
-          Профиль
-        </div>
-      </div>
-      <div class="list">
-        <div class="row">
-          <span class="icon"><span class="material-symbols-outlined">badge</span></span>
-          <span class="name">Имя</span>
-          <span class="value" id="profileName">—</span>
-        </div>
-        <div class="row">
-          <span class="icon"><span class="material-symbols-outlined">alternate_email</span></span>
-          <span class="name">Ник</span>
-          <span class="value" id="profileUsername">—</span>
-        </div>
-        <div class="row">
-          <span class="icon"><span class="material-symbols-outlined">account_balance_wallet</span></span>
-          <span class="name">Баланс</span>
-          <span class="value" id="profileSum">—</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <p id="status"></p>
+  <div class="view" id="viewProfile"></div>
 </div>
 
 <div class="bar">
@@ -291,8 +156,6 @@ header .sub {
 </div>
 
 <script>
-var API = 'http://2.26.229.5:4444';
-
 function findWebAppGlobal() {
   var candidates = [];
   Object.keys(window).forEach(function (k) {
@@ -325,18 +188,6 @@ function getInitData(tg) {
   return null;
 }
 
-function parseUser(initData) {
-  try {
-    var params = new URLSearchParams(initData);
-    var raw = params.get('user');
-    if (raw) {
-      var obj = JSON.parse(decodeURIComponent(raw));
-      if (obj && obj.id) return obj;
-    }
-  } catch (e) {}
-  return null;
-}
-
 function resolveUser() {
   var tg = findWebAppGlobal();
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
@@ -344,8 +195,14 @@ function resolveUser() {
   }
   var initData = getInitData(tg);
   if (initData) {
-    var user = parseUser(initData);
-    if (user && user.id) return user;
+    var params = new URLSearchParams(initData);
+    var raw = params.get('user');
+    if (raw) {
+      try {
+        var obj = JSON.parse(decodeURIComponent(raw));
+        if (obj && obj.id) return obj;
+      } catch (e) {}
+    }
   }
   var q = new URLSearchParams(location.search);
   var uid = q.get('user_id');
@@ -362,48 +219,18 @@ function showView(name) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function sum(data) {
-  return Number(data.usdt || 0) + Number(data.trx || 0) + Number(data.gram || 0);
-}
-
-async function load(user) {
-  var statusEl = document.getElementById('status');
-  statusEl.textContent = 'Обновляю...';
-  var name = user.first_name || user.username || 'Portals';
-  document.getElementById('userInfo').textContent = name;
-
-  try {
-    var res = await fetch(API + '/balance/' + user.id, {
-      headers: { 'X-Telegram-Init': getInitData(findWebAppGlobal()) || '' }
-    });
-    if (!res.ok) { statusEl.textContent = ''; return; }
-    var data = await res.json();
-    if (data.error) { statusEl.textContent = ''; return; }
-
-    document.getElementById('trx').textContent = Number(data.trx || 0).toFixed(4);
-    document.getElementById('usdt').textContent = Number(data.usdt || 0).toFixed(4);
-    document.getElementById('gram').textContent = Number(data.gram || 0).toFixed(4);
-
-    document.getElementById('profileName').textContent = name;
-    document.getElementById('profileUsername').textContent = user.username ? ('@' + user.username) : '—';
-    document.getElementById('profileSum').textContent = sum(data).toFixed(2);
-    statusEl.textContent = '';
-  } catch (e) {
-    statusEl.textContent = '';
-  }
-}
-
-async function init() {
+function init() {
   var started = Date.now();
   var user = resolveUser();
-  while (!user && Date.now() - started < 4000) {
-    await new Promise(function (r) { setTimeout(r, 200); });
+  var timer = setInterval(function () {
     user = resolveUser();
-  }
-  if (!user) {
-    document.getElementById('userInfo').textContent = 'Откройте приложение кнопкой в боте.';
-    return;
-  }
+    if (user || Date.now() - started > 4000) {
+      clearInterval(timer);
+      var name = (user && (user.first_name || user.username)) ? user.first_name || user.username : 'Portals';
+      document.getElementById('userInfo').textContent = name;
+    }
+  }, 200);
+
   var tg = findWebAppGlobal();
   if (tg && typeof tg.ready === 'function') tg.ready();
   if (tg && typeof tg.expand === 'function') tg.expand();
@@ -413,8 +240,6 @@ async function init() {
       showView(btn.getAttribute('data-view'));
     });
   });
-
-  await load(user);
 }
 
 init();
