@@ -15,7 +15,6 @@
   --on-primary: #381e72;
   --bg-card: #1d1b20;
   --bg-item: #2b2930;
-  --bg-settings: #17151a;
   --text-main: #e6e1e5;
   --text-sub: #cac4d0;
   --font-family: 'Roboto Flex', system-ui, -apple-system, sans-serif;
@@ -47,7 +46,7 @@ body {
 }
 
 header {
-  padding: 0 4px 16px;
+  padding: 0 4px 18px;
   animation: fade 0.5s ease both;
 }
 
@@ -65,7 +64,12 @@ header .sub {
 }
 
 .view {
+  display: none;
   animation: fade 0.35s ease both;
+}
+
+.view.active {
+  display: block;
 }
 
 .card {
@@ -110,12 +114,6 @@ header .sub {
   background: var(--bg-item);
   border-radius: 12px;
   padding: 14px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.row:active {
-  background: #34323a;
 }
 
 .row .icon {
@@ -148,18 +146,6 @@ header .sub {
   color: var(--text-sub);
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 4px;
-}
-
-.dot.trx { background: #6bd0ff; }
-.dot.usdt { background: #2bd892; }
-.dot.gram { background: var(--primary-color); }
-
-#balanceRow .value { color: var(--primary-color); }
-
 #status {
   text-align: center;
   margin: 14px 0;
@@ -170,16 +156,16 @@ header .sub {
 
 .bar {
   position: fixed;
-  bottom: 20px;
+  bottom: 16px;
   left: 0;
   right: 0;
   width: max-content;
   margin: 0 auto;
   display: flex;
-  gap: 6px;
-  align-items: center;
-  padding: 7px;
-  background: rgba(29, 27, 32, 0.92);
+  gap: 4px;
+  align-items: flex-end;
+  padding: 8px;
+  background: rgba(29, 27, 32, 0.96);
   border-radius: 999px;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -188,34 +174,36 @@ header .sub {
 }
 
 .bar button {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: none;
-  background: var(--bg-item);
-  color: var(--text-sub);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 2px;
+  min-width: 64px;
+  padding: 8px 10px;
+  border: none;
+  background: none;
+  color: var(--text-sub);
   cursor: pointer;
+  border-radius: 24px;
   transition: background 0.25s ease, color 0.25s ease, transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.bar button:hover {
-  color: var(--text-main);
-}
-
 .bar button:active {
-  transform: scale(0.92);
+  transform: scale(0.94);
 }
 
 .bar button.active {
-  background: var(--primary-color);
-  color: var(--on-primary);
+  color: var(--primary-color);
 }
 
-.bar .material-symbols-outlined {
+.bar button .material-symbols-outlined {
   font-size: 24px;
+}
+
+.bar button .bar-label {
+  font-size: 11px;
+  font-weight: 500;
 }
 
 @keyframes fade {
@@ -228,44 +216,11 @@ header .sub {
 
 <div class="wrapper">
   <header>
-    <h1>Portals</h1>
+    <h1 id="appTitle">Portals</h1>
     <p class="sub" id="userInfo">Загрузка...</p>
   </header>
 
-  <div class="view" id="viewMenu">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="material-symbols-outlined">menu</span>
-          Главное меню
-        </div>
-      </div>
-      <div class="list">
-        <div class="row" data-open="balance">
-          <span class="icon"><span class="material-symbols-outlined">account_balance_wallet</span></span>
-          <span class="name">Баланс</span>
-          <span class="value" id="menuSum">—</span>
-        </div>
-        <div class="row" data-open="shop">
-          <span class="icon"><span class="material-symbols-outlined">storefront</span></span>
-          <span class="name">Магазин</span>
-          <span class="value">скоро</span>
-        </div>
-        <div class="row" data-open="gifts">
-          <span class="icon"><span class="material-symbols-outlined">redeem</span></span>
-          <span class="name">Мои подарки</span>
-          <span class="value">скоро</span>
-        </div>
-        <div class="row" data-open="settings">
-          <span class="icon"><span class="material-symbols-outlined">settings</span></span>
-          <span class="name">Настройки</span>
-          <span class="value">скоро</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="view" id="viewBalance" style="display:none">
+  <div class="view active" id="viewHome">
     <div class="card">
       <div class="card-header">
         <div class="card-title">
@@ -274,20 +229,48 @@ header .sub {
         </div>
       </div>
       <div class="list">
-        <div class="row" id="balanceRow">
+        <div class="row">
           <span class="icon"><span class="material-symbols-outlined">currency_bitcoin</span></span>
           <span class="name">TRX</span>
           <span class="value" id="trx">—</span>
         </div>
-        <div class="row" id="balanceRow">
+        <div class="row">
           <span class="icon"><span class="material-symbols-outlined">currency_exchange</span></span>
           <span class="name">USDT</span>
           <span class="value" id="usdt">—</span>
         </div>
-        <div class="row" id="balanceRow">
+        <div class="row">
           <span class="icon"><span class="material-symbols-outlined">diamond</span></span>
           <span class="name">GRAM</span>
           <span class="value" id="gram">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="viewProfile">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="material-symbols-outlined">person</span>
+          Профиль
+        </div>
+      </div>
+      <div class="list">
+        <div class="row">
+          <span class="icon"><span class="material-symbols-outlined">badge</span></span>
+          <span class="name">Имя</span>
+          <span class="value" id="profileName">—</span>
+        </div>
+        <div class="row">
+          <span class="icon"><span class="material-symbols-outlined">alternate_email</span></span>
+          <span class="name">Ник</span>
+          <span class="value" id="profileUsername">—</span>
+        </div>
+        <div class="row">
+          <span class="icon"><span class="material-symbols-outlined">account_balance_wallet</span></span>
+          <span class="name">Баланс</span>
+          <span class="value" id="profileSum">—</span>
         </div>
       </div>
     </div>
@@ -297,8 +280,13 @@ header .sub {
 </div>
 
 <div class="bar">
-  <button class="active" id="btnMenu" title="Меню">
+  <button class="active" data-view="home">
     <span class="material-symbols-outlined">home</span>
+    <span class="bar-label">Главная</span>
+  </button>
+  <button data-view="profile">
+    <span class="material-symbols-outlined">person</span>
+    <span class="bar-label">Профиль</span>
   </button>
 </div>
 
@@ -366,28 +354,16 @@ function resolveUser() {
 }
 
 function showView(name) {
-  var menu = document.getElementById('viewMenu');
-  var balance = document.getElementById('viewBalance');
-  menu.style.display = name === 'menu' ? '' : 'none';
-  balance.style.display = name === 'balance' ? '' : 'none';
+  document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
+  document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  document.querySelectorAll('.bar button').forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-view') === name);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function animateValue(el, target) {
-  var start = parseFloat(el.textContent) || 0;
-  var dur = 700;
-  var t0 = performance.now();
-  function step(now) {
-    var p = Math.min((now - t0) / dur, 1);
-    var eased = 1 - Math.pow(1 - p, 3);
-    var v = start + (target - start) * eased;
-    if (el === document.getElementById('menuSum')) {
-      el.textContent = v.toFixed(2);
-    } else {
-      el.textContent = v.toFixed(4);
-    }
-    if (p < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
+function sum(data) {
+  return Number(data.usdt || 0) + Number(data.trx || 0) + Number(data.gram || 0);
 }
 
 async function load(user) {
@@ -403,10 +379,14 @@ async function load(user) {
     if (!res.ok) { statusEl.textContent = ''; return; }
     var data = await res.json();
     if (data.error) { statusEl.textContent = ''; return; }
-    animateValue(document.getElementById('trx'), Number(data.trx || 0));
-    animateValue(document.getElementById('usdt'), Number(data.usdt || 0));
-    animateValue(document.getElementById('gram'), Number(data.gram || 0));
-    animateValue(document.getElementById('menuSum'), Number(data.usdt || 0) + Number(data.trx || 0) + Number(data.gram || 0));
+
+    document.getElementById('trx').textContent = Number(data.trx || 0).toFixed(4);
+    document.getElementById('usdt').textContent = Number(data.usdt || 0).toFixed(4);
+    document.getElementById('gram').textContent = Number(data.gram || 0).toFixed(4);
+
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileUsername').textContent = user.username ? ('@' + user.username) : '—';
+    document.getElementById('profileSum').textContent = sum(data).toFixed(2);
     statusEl.textContent = '';
   } catch (e) {
     statusEl.textContent = '';
@@ -428,27 +408,10 @@ async function init() {
   if (tg && typeof tg.ready === 'function') tg.ready();
   if (tg && typeof tg.expand === 'function') tg.expand();
 
-  document.querySelectorAll('#viewMenu .row').forEach(function (row) {
-    row.addEventListener('click', function () {
-      var target = row.getAttribute('data-open');
-      if (target === 'balance') {
-        showView('balance');
-      } else {
-        statusHint(row.getAttribute('data-open'));
-      }
+  document.querySelectorAll('.bar button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      showView(btn.getAttribute('data-view'));
     });
-  });
-
-  function statusHint(key) {
-    var msgs = { shop: 'Магазин скоро откроется', gifts: 'Подарки скоро появятся', settings: 'Настройки скоро появятся' };
-    var statusEl = document.getElementById('status');
-    statusEl.textContent = msgs[key] || '';
-    setTimeout(function () { statusEl.textContent = ''; }, 2000);
-  }
-
-  document.getElementById('btnMenu').addEventListener('click', function () {
-    showView('menu');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   await load(user);
