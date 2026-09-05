@@ -29,23 +29,26 @@
   user-select: none;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   background: #121015;
   color: var(--text-main);
   font-family: var(--font-family);
   min-height: 100vh;
   padding: 24px 16px 130px;
-  overflow-y: auto;
+}
+
+.wrapper {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 600px;
-  margin: 0 auto 20px;
-  padding: 0 4px;
-  animation: rise 0.5s ease both;
+  padding: 0 4px 16px;
+  animation: fade 0.5s ease both;
 }
 
 header h1 {
@@ -61,34 +64,8 @@ header .sub {
   margin-top: 2px;
 }
 
-.avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--bg-item);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.avatar span {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--primary-color);
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.wrapper {
-  max-width: 600px;
-  margin: 0 auto;
+.view {
+  animation: fade 0.35s ease both;
 }
 
 .card {
@@ -98,7 +75,6 @@ header .sub {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  animation: rise 0.55s 0.1s ease both;
 }
 
 .card-header {
@@ -130,24 +106,46 @@ header .sub {
 .row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   background: var(--bg-item);
   border-radius: 12px;
-  padding: 12px 14px;
-  transition: background 0.25s ease;
+  padding: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .row:active {
   background: #34323a;
 }
 
-.row .label {
+.row .icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(208, 188, 255, 0.14);
+  color: var(--primary-color);
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.row .icon .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.row .name {
+  flex: 1;
   font-size: 15px;
   font-weight: 500;
   color: var(--text-main);
+}
+
+.row .value {
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-sub);
 }
 
 .dot {
@@ -160,12 +158,7 @@ header .sub {
 .dot.usdt { background: #2bd892; }
 .dot.gram { background: var(--primary-color); }
 
-.row .value {
-  font-size: 15px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-sub);
-}
+#balanceRow .value { color: var(--primary-color); }
 
 #status {
   text-align: center;
@@ -178,8 +171,10 @@ header .sub {
 .bar {
   position: fixed;
   bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  width: max-content;
+  margin: 0 auto;
   display: flex;
   gap: 6px;
   align-items: center;
@@ -189,7 +184,7 @@ header .sub {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   z-index: 50;
-  animation: rise 0.55s 0.2s ease both;
+  animation: fade 0.4s 0.15s ease both;
 }
 
 .bar button {
@@ -219,50 +214,90 @@ header .sub {
   color: var(--on-primary);
 }
 
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); }
+.bar .material-symbols-outlined {
+  font-size: 24px;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 </style>
 </head>
 <body>
 
-<header>
-  <div>
+<div class="wrapper">
+  <header>
     <h1>Portals</h1>
     <p class="sub" id="userInfo">Загрузка...</p>
-  </div>
-  <div class="avatar" id="avatar"></div>
-</header>
+  </header>
 
-<div class="wrapper">
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
-        Баланс
+  <div class="view" id="viewMenu">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="material-symbols-outlined">menu</span>
+          Главное меню
+        </div>
       </div>
-    </div>
-    <div class="list">
-      <div class="row">
-        <span class="label"><span class="dot trx"></span>TRX</span>
-        <span class="value" id="trx">—</span>
-      </div>
-      <div class="row">
-        <span class="label"><span class="dot usdt"></span>USDT</span>
-        <span class="value" id="usdt">—</span>
-      </div>
-      <div class="row">
-        <span class="label"><span class="dot gram"></span>GRAM</span>
-        <span class="value" id="gram">—</span>
+      <div class="list">
+        <div class="row" data-open="balance">
+          <span class="icon"><span class="material-symbols-outlined">account_balance_wallet</span></span>
+          <span class="name">Баланс</span>
+          <span class="value" id="menuSum">—</span>
+        </div>
+        <div class="row" data-open="shop">
+          <span class="icon"><span class="material-symbols-outlined">storefront</span></span>
+          <span class="name">Магазин</span>
+          <span class="value">скоро</span>
+        </div>
+        <div class="row" data-open="gifts">
+          <span class="icon"><span class="material-symbols-outlined">redeem</span></span>
+          <span class="name">Мои подарки</span>
+          <span class="value">скоро</span>
+        </div>
+        <div class="row" data-open="settings">
+          <span class="icon"><span class="material-symbols-outlined">settings</span></span>
+          <span class="name">Настройки</span>
+          <span class="value">скоро</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <div class="view" id="viewBalance" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+          Баланс
+        </div>
+      </div>
+      <div class="list">
+        <div class="row" id="balanceRow">
+          <span class="icon"><span class="material-symbols-outlined">currency_bitcoin</span></span>
+          <span class="name">TRX</span>
+          <span class="value" id="trx">—</span>
+        </div>
+        <div class="row" id="balanceRow">
+          <span class="icon"><span class="material-symbols-outlined">currency_exchange</span></span>
+          <span class="name">USDT</span>
+          <span class="value" id="usdt">—</span>
+        </div>
+        <div class="row" id="balanceRow">
+          <span class="icon"><span class="material-symbols-outlined">diamond</span></span>
+          <span class="name">GRAM</span>
+          <span class="value" id="gram">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <p id="status"></p>
 </div>
 
 <div class="bar">
-  <button class="active" id="btnHome" title="Домой">
+  <button class="active" id="btnMenu" title="Меню">
     <span class="material-symbols-outlined">home</span>
   </button>
 </div>
@@ -330,18 +365,11 @@ function resolveUser() {
   return null;
 }
 
-function renderAvatar(user) {
-  var el = document.getElementById('avatar');
-  var name = (user.first_name || user.username || 'U').charAt(0).toUpperCase();
-  if (user.photo_url) {
-    var img = document.createElement('img');
-    img.src = user.photo_url;
-    img.onerror = function () { el.innerHTML = '<span>' + name + '</span>'; };
-    el.innerHTML = '';
-    el.appendChild(img);
-  } else {
-    el.innerHTML = '<span>' + name + '</span>';
-  }
+function showView(name) {
+  var menu = document.getElementById('viewMenu');
+  var balance = document.getElementById('viewBalance');
+  menu.style.display = name === 'menu' ? '' : 'none';
+  balance.style.display = name === 'balance' ? '' : 'none';
 }
 
 function animateValue(el, target) {
@@ -352,7 +380,11 @@ function animateValue(el, target) {
     var p = Math.min((now - t0) / dur, 1);
     var eased = 1 - Math.pow(1 - p, 3);
     var v = start + (target - start) * eased;
-    el.textContent = v.toFixed(4);
+    if (el === document.getElementById('menuSum')) {
+      el.textContent = v.toFixed(2);
+    } else {
+      el.textContent = v.toFixed(4);
+    }
     if (p < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
@@ -362,7 +394,7 @@ async function load(user) {
   var statusEl = document.getElementById('status');
   statusEl.textContent = 'Обновляю...';
   var name = user.first_name || user.username || 'Portals';
-  document.getElementById('userInfo').textContent = name + ' · ID: ' + user.id;
+  document.getElementById('userInfo').textContent = name;
 
   try {
     var res = await fetch(API + '/balance/' + user.id, {
@@ -374,6 +406,7 @@ async function load(user) {
     animateValue(document.getElementById('trx'), Number(data.trx || 0));
     animateValue(document.getElementById('usdt'), Number(data.usdt || 0));
     animateValue(document.getElementById('gram'), Number(data.gram || 0));
+    animateValue(document.getElementById('menuSum'), Number(data.usdt || 0) + Number(data.trx || 0) + Number(data.gram || 0));
     statusEl.textContent = '';
   } catch (e) {
     statusEl.textContent = '';
@@ -394,11 +427,30 @@ async function init() {
   var tg = findWebAppGlobal();
   if (tg && typeof tg.ready === 'function') tg.ready();
   if (tg && typeof tg.expand === 'function') tg.expand();
-  renderAvatar(user);
 
-  document.getElementById('btnHome').addEventListener('click', function () {
+  document.querySelectorAll('#viewMenu .row').forEach(function (row) {
+    row.addEventListener('click', function () {
+      var target = row.getAttribute('data-open');
+      if (target === 'balance') {
+        showView('balance');
+      } else {
+        statusHint(row.getAttribute('data-open'));
+      }
+    });
+  });
+
+  function statusHint(key) {
+    var msgs = { shop: 'Магазин скоро откроется', gifts: 'Подарки скоро появятся', settings: 'Настройки скоро появятся' };
+    var statusEl = document.getElementById('status');
+    statusEl.textContent = msgs[key] || '';
+    setTimeout(function () { statusEl.textContent = ''; }, 2000);
+  }
+
+  document.getElementById('btnMenu').addEventListener('click', function () {
+    showView('menu');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+
   await load(user);
 }
 
