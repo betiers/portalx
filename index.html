@@ -261,7 +261,7 @@ function resolveUser() {
   return null;
 }
 
-const DATA_URL = 'https://2.26.229.5/data/';
+const DATA_URL = '/data';
 
 function loadGram(user) {
   var chip = document.getElementById('gramChip');
@@ -277,9 +277,9 @@ function loadGram(user) {
       document.getElementById('gramValue').textContent = gram.toFixed(4).replace(/\.?0+$/, '');
       chip.style.display = 'flex';
     })
-    .catch(function () {
-      chip.style.display = 'flex';
-      document.getElementById('gramValue').textContent = '0';
+    .catch(function (err) {
+      console.warn('GRAM load failed:', err);
+      chip.style.display = 'none';
     });
 }
 
