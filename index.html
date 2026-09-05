@@ -40,66 +40,92 @@ h1{margin:20px 0;font-size:24px}
 </div>
 
 <script>
-const API = 'http://2.26.229.5:4444';
+var API = 'http://2.26.229.5:4444';
 
-function getTg() {
-  return window.Telegram?.WebApp || null;
-}
-
-function waitForTg(timeoutMs) {
-  if (getTg()) return Promise.resolve(getTg());
-  return new Promise((resolve) => {
-    const started = Date.now();
-    const timer = setInterval(() => {
-      const tg = getTg();
-      if (tg || Date.now() - started > timeoutMs) {
-        clearInterval(timer);
-        resolve(tg);
-      }
-    }, 200);
+function findWebAppGlobal() {
+  var candidates = [];
+  Object.keys(window).forEach(function (k) {
+    var v = window[k];
+    if (v && typeof v === 'object') {
+      if (v.WebApp && typeof v.WebApp === 'object') candidates.push(v.WebApp);
+      if ('initData' in v || 'initDataUnsafe' in v) candidates.push(v);
+    }
   });
+  var preferred = ['Telegram', 'Catugram', 'Catup', 'WebApp'];
+  var priority = {};
+  preferred.forEach(function (n, i) { priority[n] = i; });
+  candidates.sort(function (a, b) {
+    var na = null, nb = null;
+    preferred.forEach(function (p) {
+      if (na === null && window[p] && (window[p] === a || (window[p].WebApp === a))) na = priority[p];
+      if (nb === null && window[p] && (window[p] === b || (window[p].WebApp === b))) nb = priority[p];
+    });
+    return (na === null ? 99 : na) - (nb === null ? 99 : nb);
+  });
+  return candidates[0] || window.TelegramScenario || null;
 }
 
-function resolveUserId(tg) {
-  if (tg?.initDataUnsafe?.user?.id) return String(tg.initDataUnsafe.user.id);
-  const initData = tg?.initData;
-  if (initData) {
-    const params = new URLSearchParams(initData);
-    const raw = params.get('user');
+function getInitData(tg) {
+  if (tg && typeof tg.initData === 'string' && tg.initData) return tg.initData;
+  var q = new URLSearchParams(location.search);
+  if (q.get('tgWebAppData')) return q.get('tgWebAppData');
+  var h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+  if (h.get('tgWebAppData')) return h.get('tgWebAppData');
+  return null;
+}
+
+function parseUser(initData) {
+  try {
+    var params = new URLSearchParams(initData);
+    var raw = params.get('user');
     if (raw) {
-      try {
-        const obj = JSON.parse(decodeURIComponent(raw));
-        if (obj?.id) return String(obj.id);
-      } catch (e) {}
+      var obj = JSON.parse(decodeURIComponent(raw));
+      if (obj && obj.id) return obj;
+    }
+  } catch (e) {}
+  return null;
+}
+
+function resolveUserId() {
+  var tg = findWebAppGlobal();
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+    return { id: String(tg.initDataUnsafe.user.id), username: tg.initDataUnsafe.user.username, source: 'initDataUnsafe' };
+  }
+  var initData = getInitData(tg);
+  if (initData) {
+    var user = parseUser(initData);
+    if (user && user.id) {
+      return { id: String(user.id), username: user.username, source: 'initData' };
     }
   }
-  const p = new URLSearchParams(location.search);
-  return p.get('user_id');
+  var q = new URLSearchParams(location.search);
+  var uid = q.get('user_id');
+  if (uid) return { id: uid, username: q.get('username') || '', source: 'url' };
+  return null;
 }
 
-async function load(userId) {
-  document.getElementById('userCard').style.display = 'block';
-  const statusEl = document.getElementById('status');
+async function load(user) {
+  var statusEl = document.getElementById('status');
   statusEl.textContent = 'Загрузка...';
+  document.getElementById('userInfo').textContent =
+    (user.username ? user.username : 'user') + ' (ID: ' + user.id + ')' + ' [' + user.source + ']';
 
   try {
-    const res = await fetch(`${API}/balance/${userId}`, {
-      headers: { 'X-Telegram-Init': window.Telegram?.WebApp?.initData || '' }
+    var res = await fetch(API + '/balance/' + user.id, {
+      headers: { 'X-Telegram-Init': getInitData(findWebAppGlobal()) || '' }
     });
     if (!res.ok) {
       statusEl.innerHTML = '<span class="error">Сервер недоступен</span>';
       return;
     }
-    const data = await res.json();
+    var data = await res.json();
     if (data.error) {
-      statusEl.innerHTML = `<span class="error">${data.error}</span>`;
+      statusEl.innerHTML = '<span class="error">' + data.error + '</span>';
       return;
     }
-    document.getElementById('userInfo').textContent =
-      `${data.username || 'user'} (ID: ${userId})`;
-    document.getElementById('trx').textContent = Number(data.trx ?? 0).toFixed(4);
-    document.getElementById('usdt').textContent = Number(data.usdt ?? 0).toFixed(4);
-    document.getElementById('gram').textContent = Number(data.gram ?? 0).toFixed(4);
+    document.getElementById('trx').textContent = Number(data.trx || 0).toFixed(4);
+    document.getElementById('usdt').textContent = Number(data.usdt || 0).toFixed(4);
+    document.getElementById('gram').textContent = Number(data.gram || 0).toFixed(4);
     statusEl.textContent = '';
   } catch (e) {
     statusEl.innerHTML = '<span class="error">Ошибка подключения к серверу</span>';
@@ -107,19 +133,22 @@ async function load(userId) {
 }
 
 async function init() {
-  const tg = await waitForTg(4000);
-  if (tg) {
-    tg.ready();
-    tg.expand();
+  var started = Date.now();
+  var user = resolveUserId();
+  while (!user && Date.now() - started < 4000) {
+    await new Promise(function (r) { setTimeout(r, 200); });
+    user = resolveUserId();
   }
-  const userId = resolveUserId(tg);
-  if (!userId) {
+  if (!user) {
     document.getElementById('userCard').style.display = 'none';
     document.getElementById('status').innerHTML =
-      '<span class="error">Не удалось получить данные из Telegram (initData пуст). Откройте приложение кнопкой в боте.</span>';
+      '<span class="error">Не удалось получить данные пользователя. Откройте приложение кнопкой в боте.</span>';
     return;
   }
-  await load(userId);
+  var tg = findWebAppGlobal();
+  if (tg && typeof tg.ready === 'function') tg.ready();
+  if (tg && typeof tg.expand === 'function') tg.expand();
+  await load(user);
 }
 
 init();
