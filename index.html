@@ -13,10 +13,6 @@
 :root {
   --primary-color: #d0bcff;
   --on-primary: #381e72;
-  --secondary-container: #4f378b;
-  --on-secondary-container: #eaddff;
-  --bg-card: #1d1b20;
-  --bg-item: #2b2930;
   --text-main: #e6e1e5;
   --text-sub: #cac4d0;
   --font-family: 'Roboto Flex', system-ui, -apple-system, sans-serif;
@@ -39,7 +35,7 @@ body {
   color: var(--text-main);
   font-family: var(--font-family);
   min-height: 100vh;
-  padding: 24px 16px 130px;
+  padding: 24px 16px 140px;
 }
 
 .wrapper {
@@ -81,30 +77,44 @@ header .sub {
   right: 0;
   width: max-content;
   margin: 0 auto;
+  background: rgba(18, 16, 21, 0.3);
+  border-radius: 999px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 50;
   display: flex;
   gap: 8px;
-  align-items: center;
   padding: 8px;
-  background: var(--secondary-container);
-  border-radius: 999px;
-  z-index: 50;
   animation: fade 0.4s 0.15s ease both;
 }
 
+.indicator {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  background: var(--primary-color);
+  border-radius: 999px;
+  z-index: 0;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 .bar button {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-width: 68px;
+  width: 68px;
   padding: 8px 12px;
   border: none;
   background: transparent;
   color: var(--text-sub);
   cursor: pointer;
   border-radius: 999px;
-  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease, transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.3s ease, transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bar button:active {
@@ -112,7 +122,6 @@ header .sub {
 }
 
 .bar button.active {
-  background: var(--primary-color);
   color: var(--on-primary);
 }
 
@@ -145,6 +154,7 @@ header .sub {
 </div>
 
 <div class="bar">
+  <span class="indicator" id="indicator"></span>
   <button class="active" data-view="home">
     <span class="material-symbols-outlined">home</span>
     <span class="bar-label">Главная</span>
@@ -210,16 +220,31 @@ function resolveUser() {
   return null;
 }
 
+function placeIndicator() {
+  var bar = document.querySelector('.bar');
+  var indicator = document.getElementById('indicator');
+  var active = bar.querySelector('button.active');
+  if (!active || !bar.offsetWidth) return;
+  indicator.style.width = active.offsetWidth + 'px';
+  indicator.style.transform = 'translateX(' + active.offsetLeft + 'px)';
+}
+
 function showView(name) {
   document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
   document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
   document.querySelectorAll('.bar button').forEach(function (b) {
     b.classList.toggle('active', b.getAttribute('data-view') === name);
   });
+  placeIndicator();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function init() {
+  requestAnimationFrame(function () {
+    requestAnimationFrame(placeIndicator);
+    placeIndicator();
+  });
+
   var started = Date.now();
   var user = resolveUser();
   var timer = setInterval(function () {
@@ -239,6 +264,10 @@ function init() {
     btn.addEventListener('click', function () {
       showView(btn.getAttribute('data-view'));
     });
+  });
+
+  window.addEventListener('resize', function () {
+    requestAnimationFrame(placeIndicator);
   });
 }
 
