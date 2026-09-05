@@ -44,15 +44,10 @@ body {
 }
 
 .gram-chip {
-  position: fixed;
-  top: 14px;
-  right: 16px;
-  z-index: 60;
-  display: none;
+  display: flex;
   align-items: center;
   gap: 7px;
   background: rgba(27, 25, 30, 0.92);
-  border: 1px solid rgba(208, 188, 255, 0.25);
   border-radius: 999px;
   padding: 6px 14px 6px 10px;
   backdrop-filter: blur(20px);
@@ -79,18 +74,21 @@ body {
 }
 
 header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 0 4px 18px;
   animation: fade 0.5s ease both;
 }
 
-header h1 {
+header .titles h1 {
   font-size: 24px;
   font-weight: 600;
   letter-spacing: -0.3px;
   color: var(--text-main);
 }
 
-header .sub {
+header .titles .sub {
   color: var(--text-sub);
   font-size: 13px;
   margin-top: 2px;
@@ -178,16 +176,17 @@ header .sub {
 </head>
 <body>
 
-<div class="gram-chip" id="gramChip">
-  <img class="gram-icon" src="gram.svg" alt="">
-  <span class="gram-value" id="gramValue">—</span>
-  <span class="gram-label">GRAM</span>
-</div>
-
 <div class="wrapper">
   <header>
-    <h1 id="appTitle">Portals</h1>
-    <p class="sub" id="userInfo">Загрузка...</p>
+    <div class="titles">
+      <h1 id="appTitle">Portals</h1>
+      <p class="sub" id="userInfo">Загрузка...</p>
+    </div>
+    <div class="gram-chip" id="gramChip" style="display:none">
+      <img class="gram-icon" src="icons/gram.svg" alt="">
+      <span class="gram-value" id="gramValue">—</span>
+      <span class="gram-label">GRAM</span>
+    </div>
   </header>
 
   <div class="view active" id="viewHome"></div>
@@ -262,11 +261,11 @@ function resolveUser() {
   return null;
 }
 
-const DATA_URL = 'http://2.26.229.5/data/data.txt';
+const DATA_URL = 'https://2.26.229.5/data/data.txt';
 
 function loadGram(user) {
   var chip = document.getElementById('gramChip');
-  fetch(DATA_URL)
+  fetch(DATA_URL, { mode: 'cors' })
     .then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
