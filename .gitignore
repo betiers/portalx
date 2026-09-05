@@ -4,6 +4,7 @@ requirements.txt
 data/
 pages/
 token.txt
+*.log
 __pycache__/
 *.pyc
 .env
