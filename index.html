@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portals</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f0f1a;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+h1{margin:20px 0;font-size:24px;background:linear-gradient(135deg,#7b5ea7,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:#1a1a2e;border-radius:16px;padding:20px;width:100%;max-width:400px;margin:10px 0}
+.card h3{color:#c084fc;margin-bottom:12px;font-size:16px}
+.balance-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #2a2a3e;font-size:15px}
+.balance-item:last-child{border:none}
+.balance-item .label{color:#888}
+.balance-item .value{font-weight:600;color:#e0d4f5}
+.user-info{color:#666;font-size:13px;text-align:center;margin-top:10px}
+#status{text-align:center;margin:10px 0;color:#888;font-size:13px}
+#auth{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh}
+#app{display:none}
+.btn{background:linear-gradient(135deg,#7b5ea7,#a855f7);border:none;color:#fff;padding:12px 32px;border-radius:12px;font-size:16px;cursor:pointer;margin-top:20px}
+.btn:disabled{opacity:0.5}
+.error{color:#f87171;font-size:14px;margin-top:10px}
+</style>
+</head>
+<body>
+
+<div id="auth">
+  <h1>Portals</h1>
+  <p style="color:#888">Откройте это приложение через Telegram</p>
+</div>
+
+<div id="app">
+  <h1>Portals</h1>
+  <div class="card" id="userCard">
+    <h3>Профиль</h3>
+    <div class="user-info" id="userInfo">Загрузка...</div>
+  </div>
+  <div class="card">
+    <h3>Баланс</h3>
+    <div id="balances">
+      <div class="balance-item"><span class="label">TRX</span><span class="value" id="trx">—</span></div>
+      <div class="balance-item"><span class="label">USDT</span><span class="value" id="usdt">—</span></div>
+      <div class="balance-item"><span class="label">GRAM</span><span class="value" id="gram">—</span></div>
+    </div>
+  </div>
+  <p id="status"></p>
+</div>
+
+<script>
+const API = 'http://2.26.229.5:4444';
+const tg = window.Telegram?.WebApp;
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+function getUserId() {
+  if (tg?.initDataUnsafe?.user?.id) return tg.initDataUnsafe.user.id;
+  const p = new URLSearchParams(location.search);
+  return p.get('user_id');
+}
+
+function getInitData() {
+  return tg?.initData || '';
+}
+
+async function init() {
+  const userId = getUserId();
+  if (!userId) {
+    document.getElementById('auth').style.display = 'flex';
+    return;
+  }
+
+  document.getElementById('app').style.display = 'flex';
+  const statusEl = document.getElementById('status');
+  statusEl.textContent = 'Загрузка...';
+
+  try {
+    const res = await fetch(`${API}/balance/${userId}`, {
+      headers: { 'X-Telegram-Init': getInitData() }
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      statusEl.innerHTML = `<span class="error">${data.error}</span>`;
+      return;
+    }
+
+    document.getElementById('userInfo').textContent =
+      `${data.username || 'user'} (ID: ${userId})`;
+    document.getElementById('trx').textContent = data.trx?.toFixed(4) ?? '0';
+    document.getElementById('usdt').textContent = data.usdt?.toFixed(4) ?? '0';
+    document.getElementById('gram').textContent = data.gram?.toFixed(4) ?? '0';
+    statusEl.textContent = '';
+  } catch (e) {
+    statusEl.innerHTML = '<span class="error">Ошибка подключения к серверу</span>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
